@@ -1,0 +1,8 @@
+<movie>
+        <title>%(title)s</title>
+        <originaltitle>%(title)s</originaltitle>
+        <year>%(year)s</year>
+        <outline>%(synopsis)s</outline>
+        <thumb>%(thumb)s</thumb>
+        <playURL>%(url)s</playURL>
+</movie>

@@ -1,0 +1,8 @@
+<episodedetails>
+    <title>%(episodeTitle)s</title>
+    <season>%(season)s</season>
+    <episode>%(episodeNum)s</episode>
+    <plot>%(synopsis)s</plot>
+    <playURL>%(episodeUrl)s</playURL>
+    <thumb>%(thumb)s</thumb>
+</episodedetails>
