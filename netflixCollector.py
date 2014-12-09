@@ -3,26 +3,24 @@
 import os
 import re
 import json
-import sys
 import gc
-from time import sleep
-resourcePath = r'C:\Program Files (x86)\XBMC\addons\plugin.video.xbmc_netflix\resources'
-# resourcePath = r'/Users/Knittle/Desktop/plugin.video.xbmc_netflix/resources'
-sys.path.append(resourcePath)
 import mechanize
 import bs4
 import cookielib
 import logging
+import platform
+
+from time import sleep
 
 
 # User defined vars
 #----------------------------------------------------------------------------------------
-# Netflix username and password
+# Netflix email and password
 username = ''
 password = ''
 
 # where to store collected shows
-sourceDir = r'C:\Users\XBMC\Public'
+sourceDir = ''
 
 # globals
 #----------------------------------------------------------------------------------------
@@ -40,8 +38,8 @@ movieAPI     = "http://www.netflix.com/api/shakti/%(identifier)s/bob?titleid=" \
 videoURL     = "http://www.netflix.com/WiPlayer?movieid=%(episodeId)s&trkid="  \
                "%(trackId)s"
 
+resourcePath = os.path.normpath(os.path.join(os.path.split(__file__)[:-1][0], 'resources'))
 
-#----------------------------------------------------------------------------------------
 # enumerations
 #----------------------------------------------------------------------------------------
 
@@ -50,9 +48,9 @@ kGenre        = 1
 kCategoryURL  = 1
 kGenreURL     = 2
 
+# objects
 #----------------------------------------------------------------------------------------
-# object
-#----------------------------------------------------------------------------------------
+
 
 
 class Categories(object): pass
@@ -78,6 +76,7 @@ class NetflixCollector(object):
         self.categories = {}
         self.mediaInfo  = {}
         self.identifier = ''
+        self.sourceDir  = sourceDir if sourceDir else self.defaultSourceDir()
 
     # Main App crawler
     def collectNetflix(self):
@@ -97,9 +96,11 @@ class NetflixCollector(object):
         self.browser.set_handle_referer(True)
         self.browser.set_handle_robots(False)
         self.browser.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
-        self.browser.addheaders = [('user-agent', '   Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.3) '
-                                                  'Gecko/20100423 Ubuntu/10.04 (lucid) Firefox/3.6.3'),
-                                   ('accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')]
+        self.browser.addheaders = [('user-agent',
+                                    ' Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.3) '
+                                    ' Gecko/20100423 Ubuntu/10.04 (lucid) Firefox/3.6.3'),
+                                   ('accept',
+                                    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')]
         self.browser.addheaders.append(("Accept-Language", "en-us,en"))
 
     # Login to netflix
@@ -238,7 +239,6 @@ class NetflixCollector(object):
     #------------------------------------------------------------------------------------
     # Utilities
     #------------------------------------------------------------------------------------
-
     def createNFO(self, savePath, mediaType):
         nfoFile = 'showNFO.xml' if mediaType == 'show' else 'movieNFO.xml'
         NFO = os.path.join(resourcePath, 'templates', nfoFile)
@@ -246,22 +246,6 @@ class NetflixCollector(object):
             NFO = str(f.read())
         NFO %= self.mediaInfo
         self.saveMedia(NFO, savePath, 'nfo')
-
-    def saveMedia(self, data, path, ext):
-        media = '.'.join([path, ext])
-        with open(media, 'w') as f:
-            f.write(data.encode('ascii', 'ignore'))
-
-    def cleanText(self, dirtyText):
-        return re.sub(self.CLEAN_REGEX, r"", dirtyText)
-
-    def notSubNav(self, browse):
-        """Is category a class of subnav-tabs"""
-        try:
-            _ = browse.parent['class']
-            return False
-        except KeyError:
-            return True
 
     def openURL(self, url):
         try:
@@ -289,11 +273,37 @@ class NetflixCollector(object):
         else:
             category = self.cleanText(category)
             genre = self.cleanText(genre)
-            dirTree = os.path.join(sourceDir, category, genre)
+            dirTree = os.path.join(self.sourceDir, category, genre)
             if not os.path.exists(dirTree):
                 self.LOGGER.info("Creating directory: %s" % dirTree)
                 os.makedirs(dirTree)
             return dirTree
+
+    def cleanText(self, dirtyText):
+        return re.sub(self.CLEAN_REGEX, r"", dirtyText)
+
+    @staticmethod
+    def defaultSourceDir():
+        windowsDir = r'C:\Users\Public\XBMC'
+        unixDir    = r'~/XBMC'
+        if 'windows' in platform.platform().lower():
+            return windowsDir
+        return unixDir
+
+    @staticmethod
+    def saveMedia(data, path, ext):
+        media = '.'.join([path, ext])
+        with open(media, 'w') as f:
+            f.write(data.encode('ascii', 'ignore'))
+
+    @staticmethod
+    def notSubNav(browse):
+        """Is category a class of subnav-tabs"""
+        try:
+            _ = browse.parent['class']
+            return False
+        except KeyError:
+            return True
 
 test = NetflixCollector()
 test.collectNetflix()
