@@ -1,5 +1,6 @@
 netflixXBMC
 ===========
+Supported Platforms: windows, linux, mac 
 
 A netflix crawler. Collects TV shows and Movies. Creates directory hierarchy then saves a NFO and empty .avi file to disk
 
