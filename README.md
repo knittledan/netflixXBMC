@@ -37,3 +37,8 @@ This is intended to be the backend for a XBMC netflix plugin. A UI still needs t
 
 This collect shows and movies from netflix and save reference files to disk. XBMC indexes the files saved by the crawler. When a XBMC user selects a .avi file to play the corrisponding NFO is then read and passes the playURL tag.text to a web browser or somehow plays inside XBMC. 
 
+*Why isn't the code in PEP8 standards?*
+- it's my code I made the standards
+
+*Do I know PEP8?*
+- yes
