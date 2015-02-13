@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------------------
+import sys
 import os
 import re
 import json
 import gc
-import mechanize
-import bs4
 import cookielib
 import logging
 import platform
+
+resourceDir = "resources"
+fileName =  os.path.basename(__file__)
+sys.path.insert(0, __file__.replace(fileName, resourceDir))
+
+import mechanize
+import bs4
+
 
 from time import sleep
 
